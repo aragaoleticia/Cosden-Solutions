@@ -1,42 +1,38 @@
-import React, { useState } from 'react';
-import { isListingAvailable, listings as staticListings } from '@/api/data/listings';
-import ListingList from '../components/ListingList';
+import React, { useEffect, useState } from 'react';
+
+import api from '@/api';
 import ListingFilters from '@/components/ListingFilters';
-import { Separator } from '@/components/ui';
+import { Separator, Spinner } from '@/components/ui';
+
+import ListingList from '../components/ListingList';
+
 
 
 function HomePage() {
 
-  const [listings, setListings] = useState(staticListings);
+  const [listings, setListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      setIsLoading(true);
+      const response = await api.get('/api/listings');
+      setListings(response.data);
+
+      setIsLoading(false);
+    };
+
+    fetchListings()
+  }, []);
 
   const handleFilters = (filters) => {
-    const { dates, guests, search } = filters;
 
-    let filteredListings = staticListings;
-
-    if(dates) {
-      filteredListings = filteredListings.filter((listing) => 
-        isListingAvailable(listing, dates));
-    };
-
-    if(guests) {
-      filteredListings = filteredListings.filter((listing) =>
-        guests <= listing.maxGuests);
-    };
-
-    if(search) {
-      filteredListings = filteredListings.filter((listing) =>
-        listing.name.toLowerCase(),includes(search.toLowerCase()));
-    };
-
-    setListings(filteredListings);
   };
-
 
   return (
     <div className='container py-4'>
       <div className='mb-4'>
-        <ListingFilters/>
+        <ListingFilters onChange={handleFilters} />
         <Separator className='my-4'/>
       </div>
       <ListingList listings={listings}/>
