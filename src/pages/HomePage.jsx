@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState, useRef } from 'react';
 
 import api from '@/api';
 import ListingFilters from '@/components/ListingFilters';
@@ -6,28 +7,69 @@ import { Separator, Spinner } from '@/components/ui';
 
 import ListingList from '../components/ListingList';
 
-
-
 function HomePage() {
 
   const [listings, setListings] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    dates: undefined,
+    guests: 0,
+    search: '',
+  });
+
+  const abortController = useRef(null);
 
   useEffect(() => {
     const fetchListings = async () => {
       setIsLoading(true);
-      const response = await api.get('/api/listings');
-      setListings(response.data);
+      setError(null);
 
-      setIsLoading(false);
-    };
+      abortController.current = new AbortController();
+
+      try {
+        const response = await api.get('/api/listings', {
+          params: filters,
+          signal: abortController.current?.signal
+        });
+        setListings(response.data)
+      } catch (error){
+        if (axios.isCancel(error)) {
+
+          return;
+        }
+        setError('Something went wrong');
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
     fetchListings()
-  }, []);
+
+    return () => {
+      abortController.current?.abort();
+    }
+  }, [filters]);
 
   const handleFilters = (filters) => {
-
+    setFilters(filters);
   };
+
+  const renderListingList = () => {
+    if(isLoading) {
+      return (
+        <div className='flex justify-center'>
+          <Spinner size='sm' />
+        </div>
+      )
+    }
+
+    if(error) {
+      return <div className='text-center'>{error}</div>;
+    }
+    return <ListingList listings={listings} />
+  }
+
 
   return (
     <div className='container py-4'>
@@ -35,7 +77,7 @@ function HomePage() {
         <ListingFilters onChange={handleFilters} />
         <Separator className='my-4'/>
       </div>
-      <ListingList listings={listings}/>
+      {renderListingList()}
     </div>
   )
 }
