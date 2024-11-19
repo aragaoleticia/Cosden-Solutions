@@ -2,10 +2,9 @@ import { EuroIcon, Pin, Users } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { getImageUrl } from '@/lib/utils/images';
+import ListingCardImages from '@/components/ListingCardImages.jsx';
 
 import { Card, CardContent } from './ui';
-import ListingCardImages from '@/components/ListingCardImages.jsx';
 
 
 function ListingCard({ listing }) {

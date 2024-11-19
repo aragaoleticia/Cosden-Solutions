@@ -4,11 +4,13 @@ import HomePage from '@/pages/HomePage.jsx';
 
 import App from './App';
 import ListingDetailsPage from '@/pages/ListingDetailsPage.jsx';
+import NotFoundPage from '@/pages/NotFoundPage.jsx';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App/>,
+    errorElement: <NotFoundPage />,
     children: [
       {
         path: '/',

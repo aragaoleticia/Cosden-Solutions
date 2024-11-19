@@ -43,9 +43,24 @@ function ListingDetailsPage() {
 
   }, [listingId])
 
+  const renderListing = () => {
+    if(loading) {
+      return (
+        <div className='flex justify-center'>
+          <Spinner size='sm' />
+        </div>
+      )
+    }
+    if (error) {
+      return <div className='text-center'>{error}</div>
+    }
+
+    return <ListingDetailsCard listing={listing} />;
+  }
+
   return (
     <div className='container py-4'>
-
+      {renderListing()}
     </div>
   )
 }
